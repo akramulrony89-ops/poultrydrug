@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoultryRx Reference | Digital Formulary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fff7ed; /* Orange tint for poultry theme */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #fdba74;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #f97316;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .brand-badge {
+            transition: all 0.2s ease;
+        }
+        .brand-badge:hover {
+            filter: brightness(0.95);
+            transform: translateX(4px);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* Toast notification */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #0f172a;
+            color: #fff;
+            text-align: center;
+            border-radius: 12px;
+            padding: 16px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.5s;
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-orange-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header (Orange Theme for Poultry) -->
+    <header class="bg-orange-700 text-white shadow-lg z-20 shrink-0 border-b border-orange-800">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/10 p-2.5 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid fa-feather text-3xl text-orange-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-tight leading-none">PoultryRx Reference</h1>
+                    <p class="text-[10px] md:text-xs text-orange-100 opacity-80 uppercase tracking-[0.2em] font-bold mt-1">Poultry Medicine Database</p>
+                </div>
+            </div>
+            
+            <!-- Developer Info -->
+            <div class="flex flex-col md:items-end text-center md:text-right">
+                <h2 class="text-sm md:text-base font-bold text-white tracking-wide">MD AKRAMUL HAQUE</h2>
+                <p class="text-[11px] text-orange-200 font-bold uppercase tracking-wider">BCS (LIVESTOCK)</p>
+                <a href="tel:01701057143" class="text-[11px] text-orange-200 hover:text-white transition-colors flex items-center justify-center md:justify-end gap-1.5 mt-1 font-semibold">
+                    <i class="fa-solid fa-phone-flip text-[10px]"></i> 01701057143
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
+        
+        <!-- Sidebar Controls -->
+        <aside class="w-full md:w-80 bg-white border-r border-orange-100 flex flex-col shadow-xl z-10 overflow-y-auto">
+            <div class="p-6 space-y-8">
+                <div>
+                    <h3 class="text-[10px] font-black text-slate-400 mb-4 uppercase tracking-[0.2em]">Data Filtering</h3>
+                    
+                    <!-- 1. Category Dropdown -->
+                    <div class="mb-5">
+                        <label for="typeSelect" class="block text-[11px] font-bold text-slate-600 mb-2 uppercase tracking-wide">
+                            1. Select Category
+                        </label>
+                        <select id="typeSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold text-sm">
+                            <option value="All">All Categories</option>
+                        </select>
+                    </div>
+
+                    <!-- 2. Generic Name Dropdown -->
+                    <div class="mb-5">
+                        <label for="genericSelect" class="block text-[11px] font-bold text-slate-600 mb-2 uppercase tracking-wide">
+                            2. Select Generic Name
+                        </label>
+                        <select id="genericSelect" class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all font-semibold text-sm">
+                            <option value="All">All Generics</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. Search Box -->
+                    <div>
+                        <label for="searchInput" class="block text-[11px] font-bold text-slate-600 mb-2 uppercase tracking-wide">
+                            3. Search Brand or Generic
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Type to search..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all text-sm font-medium">
+                            <i class="fa-solid fa-magnifying-glass absolute right-4 top-4 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Generics Found</span>
+                    <span id="drug-count" class="bg-orange-600 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-sm">0</span>
+                </div>
+
+                <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                    <p class="text-[10px] text-orange-800 font-bold leading-relaxed">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Click on any drug row to view Indications, Dosage (Water/Feed), and detailed brand list.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Display Table -->
+        <main class="flex-1 bg-orange-50/50 p-4 md:p-6 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-2xl shadow-sm border border-orange-100 flex flex-col h-full overflow-hidden">
+                <!-- Table Header -->
+                <div class="bg-white border-b border-orange-100 p-5 grid grid-cols-12 gap-4 font-black text-slate-500 text-[10px] uppercase tracking-[0.2em] shrink-0">
+                    <div class="col-span-5 md:col-span-4 pl-2 flex items-center gap-2">
+                        <i class="fa-solid fa-flask text-orange-500"></i> Generic Compound
+                    </div>
+                    <div class="col-span-7 md:col-span-8 border-l border-slate-100 pl-6 flex items-center gap-2">
+                        <i class="fa-solid fa-tags text-orange-500"></i> Leading Brand Names
+                    </div>
+                </div>
+
+                <!-- Scrollable Body -->
+                <div id="resultsContainer" class="overflow-y-auto custom-scrollbar flex-1">
+                    <!-- Rows injected here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden flex flex-col items-center justify-center h-full text-slate-400 p-10 animate-fade-in">
+                    <div class="bg-slate-50 p-6 rounded-full mb-6">
+                        <i class="fa-solid fa-egg text-6xl text-slate-200"></i>
+                    </div>
+                    <p class="font-bold text-slate-500 text-lg">No Results Found</p>
+                    <p class="text-sm">Try adjusting your filters or search keywords.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Enhanced Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/90 z-50 hidden flex items-center justify-center backdrop-blur-md opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl transform scale-95 transition-transform duration-300 overflow-hidden flex flex-col max-h-[90vh]" id="modalContent">
+            <!-- Modal Header -->
+            <div class="bg-orange-800 text-white p-6 md:p-8 shrink-0 relative">
+                <div class="flex flex-col gap-1 pr-10">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-orange-600/50 p-2 rounded-lg">
+                            <i class="fa-solid fa-prescription-bottle text-orange-200 text-xl"></i>
+                        </div>
+                        <h3 class="font-black text-xl md:text-2xl tracking-tight leading-snug" id="modalGeneric">-</h3>
+                    </div>
+                    <p class="text-orange-300 text-[10px] uppercase tracking-[0.25em] font-black mt-2 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
+                        <span id="modalType">-</span>
+                    </p>
+                </div>
+                <button onclick="closeModal()" class="absolute top-6 right-6 bg-white/10 hover:bg-white/20 rounded-full p-2 w-10 h-10 flex items-center justify-center transition-all group">
+                    <i class="fa-solid fa-xmark group-hover:rotate-90 transition-transform"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar bg-slate-50">
+                <!-- Clinical Info Section -->
+                <div class="p-6 md:p-8 border-b border-slate-200 bg-white">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-1 md:col-span-2 space-y-2">
+                            <h4 class="text-[11px] font-black text-orange-600 uppercase tracking-widest mb-1"><i class="fa-solid fa-stethoscope mr-1"></i> Indications</h4>
+                            <p id="modalIndications" class="text-sm text-slate-700 font-medium leading-relaxed bg-orange-50 p-3 rounded-xl border border-orange-100">-</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-1"><i class="fa-solid fa-syringe mr-1"></i> Dosage</h4>
+                            <p id="modalDosage" class="text-sm text-slate-700 font-medium leading-relaxed bg-blue-50/50 p-3 rounded-xl border border-blue-100">-</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="text-[11px] font-black text-purple-600 uppercase tracking-widest mb-1"><i class="fa-solid fa-route mr-1"></i> Administration</h4>
+                            <p id="modalAdmin" class="text-sm text-slate-700 font-medium leading-relaxed bg-purple-50/50 p-3 rounded-xl border border-purple-100">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brands Section -->
+                <div class="p-6 md:p-8">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h4 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Available Brands</h4>
+                        <span class="text-[10px] text-orange-600 font-bold bg-orange-100 px-3 py-1 rounded-full">Tap to Copy</span>
+                    </div>
+                    
+                    <div id="brandList" class="flex flex-col gap-3">
+                        <!-- Brand items injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-white p-4 border-t border-slate-100 shrink-0">
+                <button onclick="closeModal()" class="w-full bg-slate-900 hover:bg-black text-white py-3.5 rounded-xl font-black transition-all shadow-lg active:scale-95 text-xs uppercase tracking-widest">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Copied to clipboard!</div>
+
+    <script>
+        // POULTRY SPECIFIC DATABASE
+        const drugDatabase = [
+            // --- ANTIBIOTICS ---
+            { 
+                type: "Antibiotic", 
+                generic: "Ciprofloxacin (Liquid/Powder)", 
+                brand: "Liq. Ciprocin Vet (SQUARE), Sol. Cipro-A Vet (ACME), Liq. Ciproflox (Renata), Liq. Civox (Popular), Liq. Cipro (Techno), Liq. Ciprocot (ACI), Pow. Ciprocin (Square)",
+                indications: "CRD, CCRD, Salmonellosis, Fowl Cholera, Colibacillosis, Infectious Coryza.",
+                dosage: "1 ml / 1-2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Enrofloxacin (Liquid)", 
+                brand: "Sol. Enrocin (SQUARE), Sol. Enrovet (ACME), Sol. Enrox (Renata), Sol. Enro-K (Kemiko), Sol. Enrosol (Techno), Sol. Kenflox (ACI), Sol. Enroflox (Popular)",
+                indications: "Mycoplasmosis (CRD), Colibacillosis, Salmonellosis, Pasteurellosis.",
+                dosage: "1 ml / 2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Colistin Sulphate", 
+                brand: "Pow. Colirod (SQUARE), Pow. Colisult (ACI), Pow. Colitet (ACME), Pow. Renamycin (Renata) [Check comp], Sol. Coli-Vet (Techno), Pow. G-Colistin (Globe)",
+                indications: "Enteritis caused by E. coli, Salmonella. Often used in combination for synergistic effect.",
+                dosage: "1 gram / 2-3 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Doxycycline", 
+                brand: "Pow. Doxy-A Vet (ACME), Pow. Doxacil (SQUARE), Pow. Renamycin (Renata), Pow. Doxyvet (Techno), Pow. Doxin (ACI), Pow. Doxy-10/20/50 (Various)",
+                indications: "CRD, CCRD, Mycoplasmosis, Colibacillosis, Necrotic Enteritis.",
+                dosage: "1 gram / 2-4 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 4-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Amoxicillin", 
+                brand: "Pow. Moxilin Vet (ACME), Pow. Moxacil (SQUARE), Pow. Renamox (Renata), Pow. Acimox (ACI), Pow. Amoxyvet (Techno)",
+                indications: "Necrotic Enteritis, Salmonellosis, Colibacillosis, Staphylococcal infections.",
+                dosage: "1 gram / 3-5 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Tylosin Tartrate", 
+                brand: "Pow. Tylovet (Square), Pow. Tylos (ACI), Pow. Renatylo (Renata), Pow. Tylo-50 (Techno), Pow. Tylox (ACME)",
+                indications: "Mycoplasmosis (CRD), Necrotic Enteritis.",
+                dosage: "1 gram / 2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Oxytetracycline", 
+                brand: "Pow. Renamycin (Renata), Pow. Oxy-D (ACME), Pow. Tetra-Vet (Square), Pow. Tetravet (Techno)",
+                indications: "Fowl Cholera, CRD, Infectious Coryza, Non-specific diarrhea.",
+                dosage: "1 gram / 2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Sulphaclozine / Sulpha Drugs", 
+                brand: "Pow. ESB3 (Novartis), Pow. S-76 (Techno), Pow. Sulfacoz (ACI), Pow. Cosumix Plus (Novartis)",
+                indications: "Coccidiosis, Fowl Cholera, Fowl Typhoid.",
+                dosage: "1.5 - 2 grams / Liter of drinking water.",
+                administration: "Oral (Drinking Water) usually 3 days on, 2 days off, 3 days on."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Trimethoprim + Sulphadiazine", 
+                brand: "Pow. Cotrim-Vet (Square), Pow. T-S (ACME), Pow. Renatrim (Renata), Susp. Sulfatrim (Techno)",
+                indications: "Colibacillosis, Salmonellosis, Coryza, CRD.",
+                dosage: "1 gram / 1-2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Levofloxacin", 
+                brand: "Sol. Levoflox (ACME), Sol. Leo-Vet (Square), Sol. Levocin (ACI), Sol. Levofin (Renata)",
+                indications: "Resistant Respiratory Tract Infections, CRD, Colibacillosis.",
+                dosage: "1 ml / 1-2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Erythromycin", 
+                brand: "Pow. Erythrovet (Square), Pow. Erythromycin (Techno)",
+                indications: "CRD, Infectious Coryza.",
+                dosage: "1-2 grams / Liter of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Antibiotic", 
+                generic: "Neomycin Sulphate", 
+                brand: "Pow. Neomycin (Techno), Pow. Neovet (ACME)",
+                indications: "Gut infections, Non-specific Enteritis.",
+                dosage: "1 gram / 2-3 Liters of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+
+            // --- ANTICOCCIDIALS ---
+            { 
+                type: "Anticoccidial", 
+                generic: "Toltrazuril", 
+                brand: "Sol. Coxicure (SQUARE), Sol. Toltra (ACME), Sol. Coxitol (Renata), Sol. Tolracox (ACI), Sol. Coxinil (Techno)",
+                indications: "Treatment of Coccidiosis (Caecal and Intestinal).",
+                dosage: "1 ml / Liter of drinking water for 2 consecutive days.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Anticoccidial", 
+                generic: "Amprolium", 
+                brand: "Pow. Amprol (SQUARE), Pow. Emcox (ACME), Pow. Amprolium (Techno), Pow. Coxibac (ACI)",
+                indications: "Prevention and Treatment of Coccidiosis.",
+                dosage: "Treatment: 1.25 g / Liter. Prevention: 0.6 g / Liter.",
+                administration: "Oral (Drinking Water) for 5-7 days."
+            },
+            { 
+                type: "Anticoccidial", 
+                generic: "Sulphaclozine Sodium", 
+                brand: "Pow. ESB3 (Novartis), Pow. Super Cox (ACI), Pow. Cox-K (Kemiko)",
+                indications: "Coccidiosis and Fowl Typhoid.",
+                dosage: "1.5 - 2 grams / Liter of water.",
+                administration: "Oral (3 days medicine, 2 days gap, 3 days medicine)."
+            },
+            { 
+                type: "Anticoccidial", 
+                generic: "Diclazuril", 
+                brand: "Sol. Coxiril (ACME), Sol. Diclo (Square)",
+                indications: "Control of coccidiosis.",
+                dosage: "1 ml / 4 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 2 days."
+            },
+
+            // --- ANTHELMINTICS (DEWORMERS) ---
+            { 
+                type: "Anthelmintic", 
+                generic: "Levamisole (Poultry)", 
+                brand: "Pow. Avinex (ACME), Pow. Levavet (Square), Sol. Levamisole (Techno)",
+                indications: "Roundworms (Ascaridia galli), Caecal worms (Heterakis).",
+                dosage: "1 ml or 1g / 2-3 Liters of drinking water (Approx 20-25mg/kg).",
+                administration: "Oral (Drinking Water) - Single dose, repeat after 21 days."
+            },
+            { 
+                type: "Anthelmintic", 
+                generic: "Piperazine Citrate", 
+                brand: "Pow. Piperazine (Square), Pow. Pera Vet (ACME), Pow. Piper 100",
+                indications: "Roundworms (Ascarids) in poultry.",
+                dosage: "10-20 grams / 100 birds (mixed in water/feed).",
+                administration: "Oral (Drinking Water) - Single dose."
+            },
+            { 
+                type: "Anthelmintic", 
+                generic: "Ivermectin (Pour On/Sol)", 
+                brand: "Sol. Iver-P (Square), Drop A-Mectin (Renata)",
+                indications: "Internal and External parasites (Lice, Mites).",
+                dosage: "1 drop per bird (on skin) or via water as per brand.",
+                administration: "Topical or Oral."
+            },
+
+            // --- VITAMINS & MINERALS ---
+            { 
+                type: "Vitamin", 
+                generic: "Vitamin ADE", 
+                brand: "Liq. Renasol AD3E (RENATA), Liq. Adevit (Techno), Liq. Vita ADE (ACME), Liq. Vit A-D-E (Square), Liq. Acivit ADE (ACI)",
+                indications: "Vitamin A, D3, E deficiency, Stress, Poor feathering, Rickets.",
+                dosage: "1-2 ml / Liter of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Vitamin", 
+                generic: "Vitamin B-Complex", 
+                brand: "Liq. B-Com Vit (SQUARE), Liq. B-50 Forte (Techno), Liq. B-Plex (ACME), Liq. Rena-B (Renata), Liq. Ebivit (ACI)",
+                indications: "Vitamin B deficiency, Nervous signs, Poor growth, Anorexia.",
+                dosage: "2-3 ml / Liter of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Vitamin", 
+                generic: "Vitamin E + Selenium", 
+                brand: "Liq. E-Sel (SQUARE), Liq. E-Vet (ACME), Pow. Sel-E (Renata), Pow. Vit-E-Sel (ACI), Liq. E-Care (Techno)",
+                indications: "Encephalomalacia (Crazy Chick Disease), Fertility, Immunity boosting.",
+                dosage: "1 ml / 1-2 Liters of drinking water.",
+                administration: "Oral (Drinking Water) for 3-5 days."
+            },
+            { 
+                type: "Vitamin", 
+                generic: "Vitamin C", 
+                brand: "Pow. C-Vet (SQUARE), Pow. Ascovit (ACME), Pow. VC-Care (Techno), Pow. Rena-C (Renata)",
+                indications: "Heat Stress, Vaccination stress, Debility.",
+                dosage: "1 gram / Liter of drinking water.",
+                administration: "Oral (Drinking Water) - During hot hours."
+            },
+            { 
+                type: "Vitamin", 
+                generic: "Multivitamin + Amino Acids", 
+                brand: "Liq. Aminovit (Popular), Liq. Rena-WS (Renata), Pow. Hameco-PH (ACI), Liq. Vit Amino (Square), Liq. Aminol (ACME)",
+                indications: "Growth promotion, Stress, Recovering from disease.",
+                dosage: "1 ml / 1-2 Liters of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Mineral", 
+                generic: "Calcium + Vit D3", 
+                brand: "Liq. Calplex (SQUARE), Liq. Cal-D (ACME), Liq. Renacal (Renata), Liq. Cal-P (ACI)",
+                indications: "Egg shell quality, Bone strength, Cage fatigue.",
+                dosage: "2-3 ml / Liter of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Electrolyte", 
+                generic: "Electrolytes (Saline)", 
+                brand: "Pow. Renalyte (RENATA), Pow. Electromin (SQUARE), Pow. Glucolyte (ACME), Pow. Electro-C (Techno), Pow. Oralyte",
+                indications: "Dehydration, Heat stress, Diarrhea.",
+                dosage: "1 gram / Liter of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+
+            // --- GUT HEALTH & OTHERS ---
+            { 
+                type: "Gut Health", 
+                generic: "Probiotics", 
+                brand: "Pow. Protexin (ACI), Pow. Bio-Gut (Square), Pow. Renabiot (Renata)",
+                indications: "Restoring gut microflora, Competitive exclusion of pathogens.",
+                dosage: "As per label instructions (usually 1g/L or via feed).",
+                administration: "Oral (Water or Feed)."
+            },
+            { 
+                type: "Gut Health", 
+                generic: "Organic Acids (Acidifiers)", 
+                brand: "Liq. Acidocare (SQUARE), Liq. Acicid (ACI), Liq. Acidifier (Techno), Liq. pH-Guard",
+                indications: "pH reduction, Salmonella control, Gut health.",
+                dosage: "1 ml / Liter of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Liver Tonic", 
+                generic: "Liver Tonic (Herbal/Chemical)", 
+                brand: "Liq. Livatone (Globe), Liq. Hepachol (ACME), Liq. Liva-Vit (Square), Liq. Renaliv (Renata), Liq. Liver-T (ACI)",
+                indications: "Fatty Liver Syndrome, Mycotoxicosis recovery, General liver health.",
+                dosage: "1-2 ml / Liter of drinking water.",
+                administration: "Oral (Drinking Water)."
+            },
+            { 
+                type: "Other", 
+                generic: "Toxin Binder", 
+                brand: "Pow. Toxi-Nil (Techno), Pow. Toxibind (ACI), Pow. Mycoad (Square)",
+                indications: "Prevention of Mycotoxicosis in feed.",
+                dosage: "1-2 kg per Ton of feed.",
+                administration: "Mixed in Feed."
+            },
+
+            // --- VACCINES (Common) ---
+            { 
+                type: "Vaccine", 
+                generic: "Newcastle Disease (Live)", 
+                brand: "BCRDV (LRI - Eye Drop), Ranikhet (LRI), Avinew (Merial), Nobilis ND (Intervet)",
+                indications: "Prevention of Newcastle Disease (Ranikhet).",
+                dosage: "1 dose per bird (Eye drop or Water).",
+                administration: "Eye Drop or Drinking Water."
+            },
+            { 
+                type: "Vaccine", 
+                generic: "Infectious Bursal Disease (Gumboro)", 
+                brand: "Gumboro Vaccine (LRI), Bursine-2 (Zoetis), Nobilis Gumboro (Intervet), Cevac IBD (Ceva)",
+                indications: "Prevention of Gumboro Disease.",
+                dosage: "1 dose per bird.",
+                administration: "Eye Drop or Drinking Water."
+            },
+            { 
+                type: "Vaccine", 
+                generic: "Fowl Pox", 
+                brand: "Fowl Pox Vaccine (LRI), Poximune (Ceva)",
+                indications: "Prevention of Fowl Pox.",
+                dosage: "Wing web puncture.",
+                administration: "Wing Web."
+            },
+            { 
+                type: "Vaccine", 
+                generic: "Infectious Bronchitis (IB)", 
+                brand: "Ma5 (Intervet), H120 (Ceva)",
+                indications: "Prevention of Infectious Bronchitis.",
+                dosage: "1 dose per bird.",
+                administration: "Spray or Eye Drop."
+            },
+            { 
+                type: "Vaccine", 
+                generic: "Fowl Cholera", 
+                brand: "Fowl Cholera Vaccine (LRI)",
+                indications: "Prevention of Pasteurellosis.",
+                dosage: "0.5 ml or 1 ml SC/IM.",
+                administration: "Subcutaneous or IM."
+            },
+            { 
+                type: "Disinfectant", 
+                generic: "Glutaraldehyde + QAC", 
+                brand: "Sol. Virocid (ACI), Sol. GPC-8 (Renata), Sol. Timsen (Square), Sol. Microgard",
+                indications: "Shed disinfection, Equipment cleaning.",
+                dosage: "1-5 ml / Liter of water (Dilution varies).",
+                administration: "Spray / Wash."
+            },
+             { 
+                type: "Disinfectant", 
+                generic: "Iodine / Iodophor", 
+                brand: "Sol. Viodin (Square), Sol. Polydin, Sol. Fam-30 (Renata)",
+                indications: "Water sanitation, Foot bath.",
+                dosage: "1 ml / Liter (Sanitation), Stronger for footbath.",
+                administration: "Water or Footbath."
+            }
+        ];
+
+        const typeSelect = document.getElementById('typeSelect');
+        const genericSelect = document.getElementById('genericSelect');
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const drugCountSpan = document.getElementById('drug-count');
+        const emptyState = document.getElementById('emptyState');
+        const detailModal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        const brandList = document.getElementById('brandList');
+
+        // Color Utility for brands
+        function stringToColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const h = Math.abs(hash) % 360;
+            return `hsl(${h}, 70%, 45%)`;
+        }
+
+        function init() {
+            populateTypes();
+            updateGenericOptions();
+            renderTable(drugDatabase);
+            
+            typeSelect.addEventListener('change', () => {
+                updateGenericOptions();
+                filterData();
+            });
+            genericSelect.addEventListener('change', filterData);
+            searchInput.addEventListener('input', filterData);
+        }
+
+        function populateTypes() {
+            const types = [...new Set(drugDatabase.map(drug => drug.type))].sort();
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeSelect.appendChild(option);
+            });
+        }
+
+        function updateGenericOptions() {
+            const currentType = typeSelect.value;
+            const currentGeneric = genericSelect.value;
+            
+            genericSelect.innerHTML = '<option value="All">All Generics</option>';
+            
+            const filteredGenerics = drugDatabase
+                .filter(drug => currentType === 'All' || drug.type === currentType)
+                .map(drug => drug.generic)
+                .sort();
+
+            const uniqueGenerics = [...new Set(filteredGenerics)];
+            
+            uniqueGenerics.forEach(gen => {
+                const option = document.createElement('option');
+                option.value = gen;
+                option.textContent = gen;
+                genericSelect.appendChild(option);
+            });
+
+            if (uniqueGenerics.includes(currentGeneric)) {
+                genericSelect.value = currentGeneric;
+            }
+        }
+
+        function filterData() {
+            const selectedType = typeSelect.value;
+            const selectedGeneric = genericSelect.value;
+            const searchTerm = searchInput.value.toLowerCase();
+
+            const filtered = drugDatabase.filter(drug => {
+                const matchesType = selectedType === 'All' || drug.type === selectedType;
+                const matchesGeneric = selectedGeneric === 'All' || drug.generic === selectedGeneric;
+                const matchesSearch = drug.generic.toLowerCase().includes(searchTerm) || 
+                                      drug.brand.toLowerCase().includes(searchTerm);
+                return matchesType && matchesGeneric && matchesSearch;
+            });
+
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            resultsContainer.innerHTML = '';
+            drugCountSpan.textContent = data.length;
+            
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            data.forEach(drug => {
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-12 gap-4 p-5 border-b border-orange-100 hover:bg-orange-100/50 transition-all items-center animate-fade-in cursor-pointer group';
+                row.onclick = () => openModal(drug);
+
+                const brands = drug.brand.split(',').map(b => b.trim());
+                const brandSummary = brands.slice(0, 2).map(b => {
+                    return `<span class="bg-white border border-slate-200 text-slate-700 px-2.5 py-1 rounded-lg text-[11px] font-bold mr-1.5">${b}</span>`;
+                }).join('');
+
+                row.innerHTML = `
+                    <div class="col-span-5 md:col-span-4 pl-2">
+                        <div class="font-bold text-slate-900 text-sm md:text-base group-hover:text-orange-800 transition-colors">${drug.generic}</div>
+                        <div class="text-[9px] uppercase font-black text-orange-600/60 mt-1 tracking-widest">${drug.type}</div>
+                    </div>
+                    <div class="col-span-7 md:col-span-8 border-l border-orange-100 pl-6 flex flex-wrap items-center">
+                        <div class="flex items-center flex-wrap gap-y-1">
+                            ${brandSummary}
+                            ${brands.length > 2 ? `<span class="text-[10px] text-slate-400 font-bold bg-white border border-slate-200 px-2 py-1 rounded-lg">+${brands.length - 2} more...</span>` : ''}
+                        </div>
+                        <div class="ml-auto opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                             <div class="bg-orange-600 text-white w-7 h-7 rounded-full flex items-center justify-center shadow-md">
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                             </div>
+                        </div>
+                    </div>
+                `;
+                resultsContainer.appendChild(row);
+            });
+        }
+
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const toast = document.getElementById("toast");
+            toast.innerHTML = `<i class="fa-solid fa-check-circle mr-2 text-green-400"></i> ${text} copied!`;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function openModal(drug) {
+            document.getElementById('modalGeneric').textContent = drug.generic;
+            document.getElementById('modalType').textContent = drug.type;
+            
+            // Populate Clinical Info
+            document.getElementById('modalIndications').textContent = drug.indications || 'Refer to package insert.';
+            document.getElementById('modalDosage').textContent = drug.dosage || 'Refer to package insert.';
+            document.getElementById('modalAdmin').textContent = drug.administration || 'Refer to package insert.';
+
+            brandList.innerHTML = '';
+            const brands = drug.brand.split(',').map(b => b.trim()).filter(b => b !== "");
+
+            brands.forEach((brand, index) => {
+                const color = stringToColor(brand);
+                const item = document.createElement('div');
+                item.className = 'brand-badge w-full flex items-center justify-between gap-4 px-6 py-4 rounded-2xl bg-white border border-slate-100 shadow-sm cursor-pointer group active:bg-slate-50';
+                
+                item.onclick = (e) => {
+                    e.stopPropagation();
+                    copyToClipboard(brand);
+                };
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <span class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white shadow-inner" style="background-color: ${color}">
+                            ${index + 1}
+                        </span>
+                        <span class="font-bold text-slate-800 text-sm md:text-base">${brand}</span>
+                    </div>
+                    <i class="fa-solid fa-copy text-slate-300 group-hover:text-orange-500 transition-colors text-xs"></i>
+                `;
+                brandList.appendChild(item);
+            });
+
+            detailModal.classList.remove('hidden');
+            setTimeout(() => {
+                detailModal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            detailModal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                detailModal.classList.add('hidden');
+            }, 300);
+        }
+
+        detailModal.addEventListener('click', (e) => {
+            if (e.target === detailModal) closeModal();
+        });
+
+        init();
+    </script>
+</body>
+</html>
